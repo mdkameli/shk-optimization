@@ -37,7 +37,6 @@ Td2d_k = d_k./r_k + C_k./frel_k;                                                
 Ed2d_k = ptra_k*(d_k./r_k) + pcir_k.*(C_k./frel_k);                                         % Energy consumption when execution done at relay
 fedg_k = 1e9*fedg_k;                                                                        %% Gcyc/s to cyc/s
 Trel_edg_k = d_k./r_k + d_k./r_rel_k + C_k./fedg_k;                                         % Transmission time when data send from local node --> relay --> edge
-Erel_edg_k = ptra_k*(d_k./r_k) + pcir_k.*(d_k./r_rel_k + C_k./fedg_k);         % Energy consumption when data send from local node  --> relay --> edge
 Erel_edg_k = ptra_k*(d_k./r_k) + pcir_k.*(d_k./r_rel_k + C_k./fedg_k);                      % Energy consumption when data send from local node  --> relay --> edge
 Tedg_k = d_k./r_edg_k + C_k./fedg_k;                                                        % Transmission time when data send directly from local node --> edge
 Eedg_k = ptra_k*(d_k./r_edg_k) + pcir_k.*(C_k./fedg_k);                                     % Energy consumption when data send directly from local node --> edge
