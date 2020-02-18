@@ -37,7 +37,7 @@ Td2d_k = d_k./r_k + C_k./frel_k;                                                
 Ed2d_k = ptra_k*(d_k./r_k) + pcir_k.*(C_k./frel_k);                                         % Energy consumption when execution done at relay
 fedg_k = 1e9*fedg_k;                                                                        %% Gcyc/s to cyc/s
 Trel_edg_k = d_k./r_k + d_k./r_rel_k + C_k./fedg_k;                                         % Transmission time when data send from local node --> relay --> edge
-Erel_edg_k = ptra_k*(d_k./r_k) + ptra_rel_k*(d_k./r_rel_k) + pcir_k.*(C_k./fedg_k);         % Energy consumption when data send from local node  --> relay --> edge
+Erel_edg_k = ptra_k*(d_k./r_k) + pcir_k.*(d_k./r_rel_k + C_k./fedg_k);         % Energy consumption when data send from local node  --> relay --> edge
 Tedg_k = d_k./r_edg_k + C_k./fedg_k;                                                        % Transmission time when data send directly from local node --> edge
 Eedg_k = ptra_k*(d_k./r_edg_k) + pcir_k.*(C_k./fedg_k);                                     % Energy consumption when data send directly from local node --> edge
 
@@ -52,6 +52,7 @@ b2 = [b2 ; ones(K,1)];
 %% 
 e=@(j) [zeros(j-1,1);1;zeros(5*K+1-j,1)];
 e2=@(j) [zeros(j-1,1);1;zeros(5*K-j,1)];
+e3=@(j) [zeros(j-1,1);1;zeros(4-j,1)].';
 bkp=@(k) (e(4*k-3)+e(4*k-2)+e(4*k-1)+e(4*k));
 bj=@(j) (e2(4*j-3)+e2(4*j-2)+e2(4*j-1)+e2(4*j)+e2(4*K+j));
 
@@ -90,6 +91,9 @@ cvx_begin sdp
             trace(Mkrj(i,i+1)) >=0
         end
 %%%%%%%% Subjected regarding node-1 as a start point
+%            for i=1:K
+%                trace(Mkr(i)*G) == 0
+%            end
         trace(Mkr(1)*G) == 0
 %%%%%%%%
         G(5*K+1,5*K+1) == 1
@@ -102,8 +106,21 @@ x=sqrt(diag(G));
 plot(x(1:4*K),'*');
 %% Result
 fprintf("Minimum Energy = %f",trace(M0*G));
-
-
-
+%% If G is not of rank 1
+zeta = unifrnd(0,1,K,1);
+gama = G(:,end);
+gama = gama(1:end-K-2);
+v = [];
+for j=1:K
+    if zeta(j) <= gama((j-1)*4+1)
+        v = [v e3(1)];
+    elseif gama((j-1)*4+1) < zeta(j) <= gama((j-1)*4+2)
+        v = [v e3(2)];
+    elseif gama((j-1)*4+2) < zeta(j) <= gama((j-1)*4+3)
+        v = [v e3(3)];
+    elseif gama((j-1)*4+3) < zeta(j)
+        v = [v e3(4)];
+    end
+end
 
 
