@@ -101,9 +101,9 @@ cvx_begin sdp
         G(5*K+2,5*K+1) == 1
         G(5*K+2,5*K+2) == 1
 cvx_end
-G = full(G);
-x=sqrt(diag(G));
-plot(x(1:4*K),'*');
+%G = full(G);
+%x=sqrt(diag(G));
+%plot(x(1:4*K),'*');
 %% Result
 %fprintf("Minimum Energy = %f",trace(M0*G));
 %% If G is not of rank 1
