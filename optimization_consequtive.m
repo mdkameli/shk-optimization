@@ -1,7 +1,7 @@
 close all; clear all; clc; 
 %%%% FOR K Consequtive Task
 %% Define Variables
-K = 10;                                 % Number of tasks
+K = 15;                                 % Number of tasks
 B = 5;                                  % Bandwidth (Mhz)
 sig = 1e-9;                             % Noise Energy (w) for transmission btw node and relay
 sig_rel = 0.75*1e-9;                    % Noise Energy (w) for transmission btw relay and edge  
@@ -70,6 +70,20 @@ Mkd=[a0, (1/2)*b1; (1/2)*b1.', 0];
 Mkr=@(k) [a0, (1/2)*e(4*K+k); (1/2)*e(4*K+k).', 0];
 Mkrj=@(j,k) [a00, (-1/2)*(b2.'*diag(bj(j))).', (1/2)*e2(4*K+k);...
     (-1/2)*(b2.'*diag(bj(j))), 0, 0; (1/2)*e2(4*K+k).', 0, 0];
+%% Random Graph Generation (for K nodes regarding K tasks)
+while 1
+    A = round(rand(K));
+    A = triu(A) + triu(A,1)';
+    A = A - diag(diag(A));
+    A = triu(A);
+    if length(find(all(A == 0,2))) > 1
+        continue
+    else
+        break
+    end
+end
+grap = simplify(digraph(A));
+plot(grap)
 %% Optimization Formulation
 cvx_solver sedumi
 cvx_begin sdp
@@ -78,34 +92,32 @@ cvx_begin sdp
     subject to
 %          G == semidefinite(5*K+2)
         for i=1:4*K
-            trace(Mj(i)*G) == 0
+            trace(Mj(i)*G) == 0;
         end
 %%%%%%%%        
         for i=1:K
-            trace(Mkp(i)*G) == 1
+            trace(Mkp(i)*G) == 1;
         end
 %%%%%%%%        
-        trace(Mkd*G) <= Tmax
+        trace(Mkd*G) <= Tmax;
 %%%%%%%% Task Dependency (K consequtive task)
-        for i=1:K-1
-            trace(Mkrj(i,i+1)) >=0
+        for i=1:K
+            preIDs = predecessors(grap,i);
+            for j=1:length(preIDs)
+                trace(Mkrj(preIDs(j),i)) >= 0;
+            end
         end
 %%%%%%%% Subjected regarding node-1 as a start point
-%            for i=1:K
-%                trace(Mkr(i)*G) == 0
-%            end
-        trace(Mkr(1)*G) == 0
+idx = find(all(A == 0,1));
+        for i=1:length(idx)
+            trace(Mkr(idx(i))*G) == 0;
+        end
 %%%%%%%%
-        G(5*K+1,5*K+1) == 1
-        G(5*K+1,5*K+2) == 1
-        G(5*K+2,5*K+1) == 1
-        G(5*K+2,5*K+2) == 1
+        G(5*K+1,5*K+1) == 1;
+        G(5*K+1,5*K+2) == 1;
+        G(5*K+2,5*K+1) == 1;
+        G(5*K+2,5*K+2) == 1;
 cvx_end
-%G = full(G);
-%x=sqrt(diag(G));
-%plot(x(1:4*K),'*');
-%% Result
-%fprintf("Minimum Energy = %f",trace(M0*G));
 %% If G is not of rank 1
 zeta = unifrnd(0,1,K,1);
 gama = G(:,end);
@@ -123,7 +135,7 @@ for j=1:K
     end
 end
 
-%%Finding FTk and RTk but in this case we also need the directed acyclic graph which is denoted here as 'grap'
+%% Finding FTk and RTk but in this case we also need the directed acyclic graph which is denoted here as 'grap'
 RT = zeros(K,1);    %initalize the Ready time vector as 0s
 FT = zeros(K,1);    %initalize the Finish time vector as 0s
 T = b2(1:4*K)'.*v;  %Obtain computation time vector as 0s which is currently size 4*K:1
@@ -132,7 +144,7 @@ for i=1:K
      preIDs = predecessors(grap,i);
      if isempty(preIDs)
          RT(i) = 0;
-         FT(i) = T(i)
+         FT(i) = T(i);
      else
          tot = numel(preIDs);                      
          max = FT(preIDs(1));
@@ -147,8 +159,8 @@ for i=1:K
 end
 if FT(K) <= Tmax
     disp('feasible solution for the optimization problem')
-    FT(K)
+    fprintf ("FT = %f\n", FT)
 else
     disp('not feasible solution')
-    FT(K)
+    fprintf ("FT = %f/n", FT)
 end
