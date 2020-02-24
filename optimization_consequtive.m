@@ -20,7 +20,6 @@ ptra_rel_k = 0.2;                       % Transmission power (w) of relay
 H_rel_k = 1.5*1e-6;                     % channel gain between the relay and edge
 H_edg_k = 1.1*1e-6;                     % channel gain between the node and edge
 % B_rel = 8;                            % Relay bandwidth
-
 %% Initial Vector Computation
 d_k = 8*1000.*d_k;                                                                          %% KB to bit
 C_k = w_k.*d_k;                                                                             % CPU required to complete task k (cycle)
@@ -40,7 +39,6 @@ Trel_edg_k = d_k./r_k + d_k./r_rel_k + C_k./fedg_k;                             
 Erel_edg_k = ptra_k*(d_k./r_k) + pcir_k.*(d_k./r_rel_k + C_k./fedg_k);                      % Energy consumption when data send from local node  --> relay --> edge
 Tedg_k = d_k./r_edg_k + C_k./fedg_k;                                                        % Transmission time when data send directly from local node --> edge
 Eedg_k = ptra_k*(d_k./r_edg_k) + pcir_k.*(C_k./fedg_k);                                     % Energy consumption when data send directly from local node --> edge
-
 %% Initial Vector re-ordering
 b0 = [Eloc_k.';Ed2d_k.'; Erel_edg_k.'; Eedg_k.'];
 b0 = b0(:);
@@ -61,7 +59,6 @@ a0=zeros(5*K+1,5*K+1);
 a00=zeros(5*K,5*K);
 %a1=@(j) (-1/2)*(b2.'*diag(bj(j))).';
 %a2=@(k) (1/2)*e(4*K+k);
-
 %% Problem matrix definition
 M0=[a0, (1/2)*b0; (1/2)*b0.', 0];
 Mj=@(j) [diag(e(j)), (-1/2)*e(j); (-1/2)*e(j).', 0];
@@ -134,7 +131,6 @@ for j=1:K
         v = [v e3(4)];
     end
 end
-
 %% Finding FTk and RTk but in this case we also need the directed acyclic graph which is denoted here as 'grap'
 RT = zeros(K,1);    %initalize the Ready time vector as 0s
 FT = zeros(K,1);    %initalize the Finish time vector as 0s
@@ -159,8 +155,13 @@ for i=1:K
 end
 if FT(K) <= Tmax
     disp('feasible solution for the optimization problem')
-    fprintf ("FT = %f\n", FT)
+    fprintf ("Finish Time = %f\n", FT(K))
 else
     disp('not feasible solution')
-    fprintf ("FT = %f/n", FT)
+    fprintf ("Finish Time = %f/n", FT(K))
 end
+%% Final Solution
+opt_sol = zeros(5*K+2,1);
+opt_sol = [v FT.' 1 1];
+energy_consumption = opt_sol*M0*opt_sol.';
+fprintf ("Energy Consumption = %f", energy_consumption)
