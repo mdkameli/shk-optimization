@@ -155,13 +155,13 @@ for i=1:K
 end
 if FT(K) <= Tmax
     disp('feasible solution for the optimization problem')
-    fprintf ("Finish Time = %f\n", FT(K))
+    fprintf ("Finish Time = %f (Sec)\n", FT(K))
 else
     disp('not feasible solution')
-    fprintf ("Finish Time = %f/n", FT(K))
+    fprintf ("Finish Time = %f (Sec)\n", FT(K))
 end
 %% Final Solution
 opt_sol = zeros(5*K+2,1);
 opt_sol = [v FT.' 1 1];
 energy_consumption = opt_sol*M0*opt_sol.';
-fprintf ("Energy Consumption = %f", energy_consumption)
+fprintf ("Energy Consumption = %f(watt)", energy_consumption)
