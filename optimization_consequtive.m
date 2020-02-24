@@ -131,6 +131,21 @@ for j=1:K
         v = [v e3(4)];
     end
 end
+%% Different Scenarios:
+% Optimal Solution
+disp('Optimal Solution');      % For Computed v;
+% 1) All computation done locally
+v_loc = repmat([1 0 0 0], 1, K);
+%disp('All computation done locally');v = v_loc;
+% 2) All computation done in Relay
+v_d2d = repmat([0 1 0 0], 1, K);
+%disp('All computation done in Relay');v = v_d2d;
+% 3) All computation done in edge through relay connection
+v_rel = repmat([0 0 1 0], 1, K);
+%disp('All computation done in edge through relay connection');v = v_rel;
+% 4) All computation done in edge through device direct connection
+v_edg = repmat([0 0 0 1], 1, K);
+%disp('All computation done in edge through device direct connection');v = v_edg;
 %% Finding FTk and RTk but in this case we also need the directed acyclic graph which is denoted here as 'grap'
 RT = zeros(K,1);    %initalize the Ready time vector as 0s
 FT = zeros(K,1);    %initalize the Finish time vector as 0s
@@ -155,13 +170,13 @@ for i=1:K
 end
 if FT(K) <= Tmax
     disp('feasible solution for the optimization problem')
-    fprintf ("Finish Time = %f (Sec)\n", FT(K))
+    fprintf ("Finish Time        = %f (Sec)\n", FT(K))
 else
     disp('not feasible solution')
-    fprintf ("Finish Time = %f (Sec)\n", FT(K))
+    fprintf ("Finish Time        = %f (Sec)\n", FT(K))
 end
-%% Final Solution
-opt_sol = zeros(5*K+2,1);
+
+% Final Solution
 opt_sol = [v FT.' 1 1];
 energy_consumption = opt_sol*M0*opt_sol.';
-fprintf ("Energy Consumption = %f(watt)", energy_consumption)
+fprintf ("Energy Consumption = %f (watt)\n", energy_consumption)
