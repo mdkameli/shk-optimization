@@ -67,114 +67,23 @@ Mkd=[a0, (1/2)*b1; (1/2)*b1.', 0];
 Mkr=@(k) [a0, (1/2)*e(4*K+k); (1/2)*e(4*K+k).', 0];
 Mkrj=@(j,k) [a00, (-1/2)*(b2.'*diag(bj(j))).', (1/2)*e2(4*K+k);...
     (-1/2)*(b2.'*diag(bj(j))), 0, 0; (1/2)*e2(4*K+k).', 0, 0];
+    
 %% Random Graph Generation (for K nodes regarding K tasks)
-while 1
-    A = round(rand(K));
-    A = triu(A) + triu(A,1)';
-    A = A - diag(diag(A));
-    A = triu(A);
-    if length(find(all(A == 0,2))) > 1
-        continue
-    else
-        break
-    end
-end
+A = graph_generator(K);
 grap = simplify(digraph(A));
 plot(grap)
+
 %% Optimization Formulation
-cvx_solver sedumi
-cvx_begin sdp
-    variable G(5*K+2, 5*K+2) semidefinite
-    minimize (trace(M0*G))
-    subject to
-%          G == semidefinite(5*K+2)
-        for i=1:4*K
-            trace(Mj(i)*G) == 0;
-        end
-%%%%%%%%        
-        for i=1:K
-            trace(Mkp(i)*G) == 1;
-        end
-%%%%%%%%        
-        trace(Mkd*G) <= Tmax;
-%%%%%%%% Task Dependency (K consequtive task)
-        for i=1:K
-            preIDs = predecessors(grap,i);
-            for j=1:length(preIDs)
-                trace(Mkrj(preIDs(j),i)) >= 0;
-            end
-        end
-%%%%%%%% Subjected regarding node-1 as a start point
-idx = find(all(A == 0,1));
-        for i=1:length(idx)
-            trace(Mkr(idx(i))*G) == 0;
-        end
-%%%%%%%%
-        G(5*K+1,5*K+1) == 1;
-        G(5*K+1,5*K+2) == 1;
-        G(5*K+2,5*K+1) == 1;
-        G(5*K+2,5*K+2) == 1;
-cvx_end
+G = cvx_opt(M0, Mj, Mkp, Mkd, Mkrj, Mkr, grap, A, K, Tmax);
+
 %% If G is not of rank 1
-zeta = unifrnd(0,1,K,1);
-gama = G(:,end);
-gama = gama(1:end-K-2);
-v = [];
-for j=1:K
-    if zeta(j) <= gama((j-1)*4+1)
-        v = [v e3(1)];
-    elseif gama((j-1)*4+1) < zeta(j) <= gama((j-1)*4+2)
-        v = [v e3(2)];
-    elseif gama((j-1)*4+2) < zeta(j) <= gama((j-1)*4+3)
-        v = [v e3(3)];
-    elseif gama((j-1)*4+3) < zeta(j)
-        v = [v e3(4)];
-    end
-end
-%% Different Scenarios:
-% Optimal Solution
-disp('Optimal Solution');      % For Computed v;
-% 1) All computation done locally
-v_loc = repmat([1 0 0 0], 1, K);
-%disp('All computation done locally');v = v_loc;
-% 2) All computation done in Relay
-v_d2d = repmat([0 1 0 0], 1, K);
-%disp('All computation done in Relay');v = v_d2d;
-% 3) All computation done in edge through relay connection
-v_rel = repmat([0 0 1 0], 1, K);
-%disp('All computation done in edge through relay connection');v = v_rel;
-% 4) All computation done in edge through device direct connection
-v_edg = repmat([0 0 0 1], 1, K);
-%disp('All computation done in edge through device direct connection');v = v_edg;
+v = v_formulation(G, K);
+
+%% Different Scenarios: along with K input 1 for local, 2 for relay, 3 for edge via relay and 4 for edge execution in following function
+v = different_v(1,K); %here as example input as 1 will give local execution only
+
 %% Finding FTk and RTk but in this case we also need the directed acyclic graph which is denoted here as 'grap'
-RT = zeros(K,1);    %initalize the Ready time vector as 0s
-FT = zeros(K,1);    %initalize the Finish time vector as 0s
-T = b2(1:4*K)'.*v;  %Obtain computation time vector as 0s which is currently size 4*K:1
-T = T(T~=0);        %To make the size K:1 and only obtain the actual execution time computed at either local, D2D, rel_edg or edg
-for i=1:K
-     preIDs = predecessors(grap,i);
-     if isempty(preIDs)
-         RT(i) = 0;
-         FT(i) = T(i);
-     else
-         tot = numel(preIDs);                      
-         max = FT(preIDs(1));
-         for j=2:tot
-           if FT(preIDs(j)) > max
-              max = FT(preIDs(j));  %obtain the highest finish time amongst the predecessor nodes  
-           end
-         end
-             RT(i) = max;
-             FT(i) = RT(i) + T(i);
-     end
-end
-if FT(K) <= Tmax
-    disp('feasible solution for the optimization problem')
-    fprintf ("Finish Time        = %f (Sec)\n", FT(K))
-else
-    disp('not feasible solution')
-    fprintf ("Finish Time        = %f (Sec)\n", FT(K))
-end
+FT = find_FT(b2, v, grap, Tmax, K);
 
 % Final Solution
 opt_sol = [v FT.' 1 1];
