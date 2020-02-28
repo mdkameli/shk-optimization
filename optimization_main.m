@@ -12,11 +12,11 @@ A = graph_generator(K);
 grap = simplify(digraph(A));
 plot(grap)
 %% Problem Matrix Generation
-for i=1:5
-    for j=1:5
-        %d_k = unifrnd(50+100*i,150+100*i,K,1);
-        w_k = 2.5*i;
-        [M0, Mj, Mkp, Mkd, Mkrj, Mkr , b2] = Mat_Gen(d_k, w_k, K, Tmax);
+for i=1:5                   %5 different values of w_k taken and find its respective optimized energy
+    %d_k = unifrnd(50+100*i,150+100*i,K,1);
+    w_k = 5*i;
+    [M0, Mj, Mkp, Mkd, Mkrj, Mkr , b2] = Mat_Gen(d_k, w_k, K);
+    for j=1:5             %L = 5 times the samples are run to find optimized energy
         %% Optimization Formulation
         G = cvx_opt(M0, Mj, Mkp, Mkd, Mkrj, Mkr, grap, A, K, Tmax);
         %% If G is not of rank 1
@@ -28,12 +28,11 @@ for i=1:5
         energy_consumption = opt_sol*M0*opt_sol.';
         eng = [eng energy_consumption];
         %d_ave = [d_ave mean(d_k)];
-        FT_ave = [FT_ave FT(K)];
-        w_ave = [w_ave w_k];
+        FT_ave = [FT_ave FT(K)];        
         %fprintf ("Energy Consumption = %f (j)\n", energy_consumption)
-        %fprintf ("Average Data Size  = %f (KB) ,i=%d\n", mean(d_k), i)
-        
+        %fprintf ("Average Data Size  = %f (KB) ,i=%d\n", mean(d_k), i)        
     end
+    w_ave = [w_ave w_k];
     opt_eng_tmp = min(eng);
     eng=[];
     opt_eng = [opt_eng opt_eng_tmp];
@@ -41,5 +40,5 @@ for i=1:5
 end
 %% Different Scenarios: along with K input 1 for local, 2 for relay, 3 for edge via relay and 4 for edge execution in following function
 %v = different_v(1,K); %here as example input as 1 will give local execution only
-plot(opt_eng, 'r-o')
+plot(w_ave, opt_eng, 'r-o')
 grid on
