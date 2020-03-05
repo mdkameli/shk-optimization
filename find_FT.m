@@ -29,5 +29,7 @@ else
     disp('not feasible solution')
     fprintf ("Finish Time        = %f (Sec)\n", FT(K))
 end
+T=[];
 end
+
 

@@ -1,7 +1,7 @@
 function A = graph_generator(K)
 %% Random Graph Generation (for K nodes regarding K tasks)
 while 1
-    A = round(rand(K));
+    A = round(rand(K)-0.3);
     A = triu(A) + triu(A,1)';
     A = A - diag(diag(A));
     A = triu(A);

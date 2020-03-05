@@ -13,10 +13,10 @@ truncate_binomial=truncate(binomail1,1,inf);           % truncate(bi1,lower,uppe
 
 for ii=1:it
    %% Choose your favorite branching from the following:
- B=Full_Binary_Branching(nn,m0,m2,p0);               % Full Binary trees, Branching is 0(m0) or 2(m2), (set ng=4)
+ %B=Full_Binary_Branching(nn,m0,m2,p0);               % Full Binary trees, Branching is 0(m0) or 2(m2), (set ng=4)
  %B=General_Binary_Branching(nn,m0,m1,m2,p0);        % General Binary trees, Branching is 0 (m0),1(m1), or 2(m2), (set ng=3)
  %B=Uniform_Branching(nn,nd);                        % Uniform Branching, zero branching start after g>=2, nd=4,ng=4
- %B=Binomial_Branching(nn,nd,truncate_binomial,p0);  % Binomail branching, zero brnaching is start after g>=2, nd=4,ng=4
+ B=Binomial_Branching(nn,nd,truncate_binomial,p0);  % Binomail branching, zero brnaching is start after g>=2, nd=4,ng=4
 %% Adjacency Matrix 
  [adj,nh,S,n1,node]=adjacency_matrix_generator(B,ng);     % constructing the adjacency matrix from the branching
  %Save_adjacency2file(ii, nh,node,adj);                  % save the trees as file_number.tree

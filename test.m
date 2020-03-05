@@ -1,9 +1,9 @@
-function [M0, Mj, Mkp, Mkd, Mkrj, Mkr , b2] = Mat_Gen(d_k, w_k, K)
+clear all; close all;
 % Define Variables
-%K = 5;                                  % Number of tasks
-%Tmax = 3;  
-%d_k = unifrnd(300,500,K,1);             % data size (uniformly distributed btw 300-500 KB)
-%w_k = 30;                               % CPU cycle for each bit in task (cycl/bit)
+K = 5;                                  % Number of tasks
+Tmax = 3;  
+d_k = unifrnd(300,500,K,1);             % data size (uniformly distributed btw 300-500 KB)
+w_k = 30;                               % CPU cycle for each bit in task (cycl/bit)
 floc_k = 0.1;                           % local CPU cycl frequency (uniform dist. btw 0.1-0.5 Gcyc/s)
 fedg_k = 2;                             % edge CPU cycle frequency (Gcyc/s)
 frel_k = 1;                             % assume 2nd device(relay) CPU cycle frequency (Gcyc/s)
@@ -23,7 +23,7 @@ H_edg_k = 1.1*1e-6;                     % channel gain between the node and edge
 % CHANNELS BANDWIDTH
 B_dev = randi([3,6], K, 1);             % Device to Relay Bandwidth (Mhz)
 B_rel = randi([5,10], K, 1);            % Relay to edge Bandwidth (Mhz)
-B_edg = randi([1,5], K, 1);             % Device to Edge Bandwidth (Mhz)
+B_edg = randi([0,5], K, 1);             % Device to Edge Bandwidth (Mhz)
 %% Initial Vector Computation
 d_k = 8*1000.*d_k;                                                                          %% KB to bit
 C_k = w_k.*d_k;                                                                             % CPU required to complete task k (cycle)
@@ -79,4 +79,3 @@ Mkd=[a0, (1/2)*b1; (1/2)*b1.', 0];
 Mkr=@(k) [a0, (1/2)*e(4*K+k); (1/2)*e(4*K+k).', 0];
 Mkrj=@(j,k) [a00, (-1/2)*(b2.'*diag(bj(j))).', (1/2)*e2(4*K+k);...
     (-1/2)*(b2.'*diag(bj(j))), 0, 0; (1/2)*e2(4*K+k).', 0, 0];
-end
