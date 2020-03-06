@@ -11,26 +11,17 @@ A = graph_generator(K);
 grap = simplify(digraph(A));
 plot(grap)
 %% Problem Matrix Generation
-<<<<<<< HEAD
 for i=1:40
     for j=1:1
         %d_k = unifrnd(50+100*i,150+100*i,K,1);
         w_k = 1.5*i;
         [M0, Mj, Mkp, Mkd, Mkrj, Mkr , b2] = Mat_Gen(d_k, w_k, K);
         % Optimization Formulation
-=======
-for i=1:5                   %5 different values of w_k taken and find its respective optimized energy
-    %d_k = unifrnd(50+100*i,150+100*i,K,1);
-    w_k = 5*i;
-    [M0, Mj, Mkp, Mkd, Mkrj, Mkr , b2] = Mat_Gen(d_k, w_k, K);
-    for j=1:5             %L = 5 times the samples are run to find optimized energy
-        %% Optimization Formulation
->>>>>>> bd52c7d5a9fc7afa0dcdd95e7082d85434c67091
         G = cvx_opt(M0, Mj, Mkp, Mkd, Mkrj, Mkr, grap, A, K, Tmax);
         % If G is not of rank 1
         while 1
             v = v_formulation(G, K);
-           % Finding FTk and RTk but in this case we also need the directed acyclic graph which is denoted here as 'grap'
+            % Finding FTk and RTk but in this case we also need the directed acyclic graph which is denoted here as 'grap'
             FT = find_FT(b2, v, grap, Tmax, K);
             if FT(K) > Tmax
                 continue
@@ -56,8 +47,4 @@ end
 %% Different Scenarios: along with K input 1 for local, 2 for relay, 3 for edge via relay and 4 for edge execution in following function
 %v = different_v(1,K); %here as example input as 1 will give local execution only
 plot(w_ave, opt_eng, 'r-o')
-<<<<<<< HEAD
 grid on
-=======
-grid on
->>>>>>> bd52c7d5a9fc7afa0dcdd95e7082d85434c67091
