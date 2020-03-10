@@ -1,7 +1,6 @@
 function v = v_formulation(G, K)
 %When rank of G matrix is not 1 then find vector v which is the offloading
 %decision
-%rng(3);
 e3=@(j) [zeros(j-1,1);1;zeros(4-j,1)].';
 zeta = unifrnd(0,1,K,1);
 gama = G(:,end);
