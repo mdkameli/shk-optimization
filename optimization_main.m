@@ -76,15 +76,17 @@ for i=1:30
     energy_edg = sol_edg*M0*sol_edg.';
     eng_edg = [eng_edg energy_edg];
 end
+ax=[eng_loc;eng_rel;eng_redg;eng_edg];
+ay=min(ax);
 %% PLOT THE RESULTS
-plot(w_ave, opt_eng, 'r-o')
+plot(w_ave, opt_eng, 'r-d','MarkerSize',8,'LineWidth',1.5)
 grid on
 hold on
-plot(w_ave, eng_loc, '-*')
-plot(w_ave, eng_rel, '-+')
-plot(w_ave, eng_redg, '-^')
-plot(w_ave, eng_edg, '-.>')
-legend({'Optimum Solution', 'Local', 'Relay', 'Relay to Edge', 'Device to Edge'}, 'Location','northwest')
+plot(w_ave, eng_loc, '--*')
+plot(w_ave, eng_rel, '--+')
+plot(w_ave, eng_redg, '--^')
+plot(w_ave, eng_edg, '-->')
+plot(w_ave, ay, 'b-s','MarkerSize',10,'LineWidth',1.5)
+legend({'Optimum Solution', 'Local', 'Relay', 'Relay to Edge', 'Device to Edge', 'Base Solution'}, 'Location','northwest')
 hold off 
-
 
