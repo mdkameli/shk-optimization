@@ -1,39 +1,33 @@
 clear all; close all;
 % Define Variables
-K = 5;                                  % Number of tasks
+K = 15;                                  % Number of tasks
 Tmax = 3;  
 d_k = unifrnd(300,500,K,1);             % data size (uniformly distributed btw 300-500 KB)
-w_k = 30;                               % CPU cycle for each bit in task (cycl/bit)
-floc_k = 0.1;                           % local CPU cycl frequency (uniform dist. btw 0.1-0.5 Gcyc/s)
+w_k = 10;                               % CPU cycle for each bit in task (cycl/bit)
+floc_k = 0.5;                           % local CPU cycl frequency (uniform dist. btw 0.1-0.5 Gcyc/s)
 fedg_k = 2;                             % edge CPU cycle frequency (Gcyc/s)
 frel_k = 1;                             % assume 2nd device(relay) CPU cycle frequency (Gcyc/s)
 k1 = 1e-27;                             % Effective switched capacitance
-ptra_k = 0.1;                           % Idle transmission power (w) (of local node)
-pcir_k = repmat(0.1, K, 1);             % Idle circuit power (uniform dist. btw 0.001-0.01 w)
-ptra_rel_k = 0.2;                       % Transmission power (w) of relay
+ptra_k = 2*1e-3;                           % Idle transmission power (mW) (of local node)
+pcir_k = repmat(0.01, K, 1);             % Idle circuit power (uniform dist. btw 0.001-0.01 w)
+ptra_rel_k = 4*1e-3;                       % Transmission power (mW) of relay
 %%%% CHANNEL PARAMETER DEFINITION
 % CHANELS NOISES
-sig_dev = 1e-9;                         % Noise Energy (w) for transmission btw node and relay
-sig_rel = 0.75*1e-9;                    % Noise Energy (w) for transmission btw relay and edge  
-sig_edg = 1.2*1e-9;                     % Noise Energy (w) for transmission btw node and edge 
+sig = 1e-9;                         % Varriance of the Gaussian channel Noise
 % CHANNELS GAINS
-H_dev_k = 1e-6;                         % Signal Energy (channel gain between the node and relay(2nd device))
-H_rel_k = 1.5*1e-6;                     % channel gain between the relay and edge
-H_edg_k = 1.1*1e-6;                     % channel gain between the node and edge
+H_dev_k = 1e-7;                         % Signal Energy (channel gain between the node and relay(2nd device))
+H_rel_k = 1e-6;                     % channel gain between the relay and edge
+H_edg_k = 1e-7;                     % channel gain between the node and edge
 % CHANNELS BANDWIDTH
-B_dev = randi([3,6], K, 1);             % Device to Relay Bandwidth (Mhz)
-B_rel = randi([5,10], K, 1);            % Relay to edge Bandwidth (Mhz)
-B_edg = randi([0,5], K, 1);             % Device to Edge Bandwidth (Mhz)
+B = 5; %randi([3,6], K, 1);             % Channel Bandwidth (Mhz)
 %% Initial Vector Computation
 d_k = 8*1000.*d_k;                                                                          %% KB to bit
 C_k = w_k.*d_k;                                                                             % CPU required to complete task k (cycle)
 %%%% CHANNELS RATES
-B_dev = B_dev*1e6;                                                                          %% Mhz to hz
-B_rel = B_rel.*1e6;                                                                         %% Mhz to hz
-B_edg = B_edg.*1e6;                                                                         %% Mhz to hz
-r_k = B_dev*log2(1+(ptra_k*H_dev_k/sig_dev));                                               % Transmission rate btw device and relay (bit/s)
-r_rel_k = B_rel*log2(1+(ptra_rel_k*H_rel_k/sig_rel));                                       % Transmission rate btw relay and edge (bit/s)
-r_edg_k = B_edg*log2(1+(ptra_k*H_edg_k/sig_edg));                                           % Transmission rate btw device and edge (bit/s)
+B = B*1e6;                                                                          %% Mhz to hz
+r_k = B*log2(1+(ptra_k*H_dev_k/sig));                                               % Transmission rate btw device and relay (bit/s)
+r_rel_k = B*log2(1+(ptra_rel_k*H_rel_k/sig));                                       % Transmission rate btw relay and edge (bit/s)
+r_edg_k = B*log2(1+(ptra_k*H_edg_k/sig));                                           % Transmission rate btw device and edge (bit/s)
 %%%% TIME & ENERGY COMPUTATION
 floc_k = 1e9.*floc_k;                                                                       %% Gcyc/s to cyc/s
 frel_k = 1e9.*frel_k;                                                                       %% Gcyc/s to cyc/s
@@ -43,11 +37,10 @@ Tloc_k = C_k./floc_k;                                                           
 Eloc_k = (k1*floc_k.^2).*C_k;                                                               % Local energy cunsumption
 % DEVICE TO RELAY
 Td2d_k = d_k./r_k + C_k./frel_k;                                                            % Transmission time when data send from local node --> relay
-Ed2d_k = ptra_k*(d_k./r_k) + pcir_k.*(C_k./frel_k) + (k1*frel_k.^2).*C_k;                   % Energy consumption when execution done at relay
+Ed2d_k = ptra_k*(d_k./r_k) + pcir_k.*(C_k./frel_k);                                         % Energy consumption when execution done at relay
 % RELAY TO EDGE %
 Trel_edg_k = d_k./r_k + d_k./r_rel_k + C_k./fedg_k;                                         % Transmission time when data send from local node --> relay --> edge
-Erel_edg_k = ptra_k*(d_k./r_k) + ptra_rel_k.*(d_k./r_rel_k) ...
-            + pcir_k.*(d_k./r_rel_k + C_k./fedg_k);                                         % Energy consumption when data send from local node  --> relay --> edge
+Erel_edg_k = ptra_k*(d_k./r_k) + pcir_k.*(d_k./r_rel_k + C_k./fedg_k);                      % Energy consumption when data send from local node  --> relay --> edge
 % DEVICE TO EDGE %
 Tedg_k = d_k./r_edg_k + C_k./fedg_k;                                                        % Transmission time when data send directly from local node --> edge
 Eedg_k = ptra_k*(d_k./r_edg_k) + pcir_k.*(C_k./fedg_k);                                     % Energy consumption when data send directly from local node --> edge
