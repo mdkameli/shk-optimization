@@ -1,11 +1,11 @@
 function G = cvx_opt(M0, Mj, Mkp, Mkd, Mkrj, Mkr, grap, A, K, Tmax)
 %% Function for optimization formulation and to obtain G matrix which is defines as gg'
+
+cvx_begin sdp %quiet
 cvx_solver sedumi
-cvx_begin sdp
     variable G(5*K+2, 5*K+2) semidefinite
     minimize (trace(M0*G))
     subject to
-%          G == semidefinite(5*K+2)
         for i=1:4*K
             trace(Mj(i)*G) == 0;
         end

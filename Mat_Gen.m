@@ -9,7 +9,7 @@ fedg_k = 2;                             % edge CPU cycle frequency (Gcyc/s)
 frel_k = 1;                             % assume 2nd device(relay) CPU cycle frequency (Gcyc/s)
 k1 = 1e-27;                             % Effective switched capacitance
 ptra_k = 200*1e-3;                           % Idle transmission power (mW) (of local node)
-pcir_k = repmat(0.1, K, 1);             % Idle circuit power (uniform dist. btw 0.001-0.01 w)
+pcir_k = repmat(0.01, K, 1);             % Idle circuit power (uniform dist. btw 0.001-0.01 w)
 ptra_rel_k = 400*1e-3;                       % Transmission power (mW) of relay
 %%%% CHANNEL PARAMETER DEFINITION
 % CHANELS NOISES

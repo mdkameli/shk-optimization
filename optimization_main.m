@@ -3,8 +3,8 @@ close all; clear all; clc;
 %% Define Variables
 K = 15;                                 % Number of tasks
 Tmax = 3;                               % service threshold
-rep = 100;                               % Solution repetition
-rang = 16;                              % Solution range of change
+rep = 1;                               % Solution repetition
+rang = 10;                              % Solution range of change
 d_k = unifrnd(300, 500, K, 1);
 %w_k = 30;                               % CPU cycle for each bit in task (cycl/bit)
 eng = []; d_ave = []; FT_ave = []; w_ave = [];% opt_eng_tmp = 0;
@@ -51,7 +51,7 @@ for i=1:rang
 end
 %% Different Scenarios: along with K input 1 for local, 2 for relay, 3 for edge via relay and 4 for edge execution in following function
 %v = different_v(1,K); %here as example input as 1 will give local execution only
-for i=1:16
+for i=1:rang
     w_k = 5*i;
     [M0, Mj, Mkp, Mkd, Mkrj, Mkr , b2] = Mat_Gen(d_k, w_k, K);
     % LOCAL
@@ -102,7 +102,7 @@ plot(w_ave, eng_rel, '--+')
 plot(w_ave, eng_redg, '--^')
 plot(w_ave, eng_edg, '-->')
 %plot(w_ave, ay, 'b-s','MarkerSize',10,'LineWidth',1.5)
-legend({'Optimum Solution', 'Local', 'Relay', 'Relay to Edge', 'Device to Edge', 'Base Solution'}, 'Location','northwest')
+legend({'Optimum Solution', 'Local', 'Relay', 'Relay to Edge', 'Device to Edge'}, 'Location','northwest')
 hold off 
 %% PLOT THE RESULTS IN JULE
 figure 
